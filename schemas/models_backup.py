@@ -1,5 +1,5 @@
 """
-Pydantic v2 호환 모델 정의
+Pydantic models for data validation and serialization.
 """
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any
@@ -10,7 +10,7 @@ from enum import Enum
 class JobStatus(str, Enum):
     """Job execution status enumeration."""
     RUNNING = "running"
-    COMPLETED = "completed"
+    COMPLETED = "completed" 
     FAILED = "failed"
 
 
@@ -22,7 +22,7 @@ class TargetTicker(BaseModel):
     added_date: date = Field(..., description="Date when ticker was added to tracking")
     is_active: bool = Field(default=True, description="Whether ticker is actively being tracked")
     last_analyzed_date: Optional[date] = Field(None, description="Last successful analysis date in KST")
-
+    
     @field_validator('ticker')
     @classmethod
     def validate_ticker(cls, v):
@@ -54,7 +54,7 @@ class JobStatusRecord(BaseModel):
     end_time_utc: Optional[datetime] = Field(None, description="Job end time in UTC")
     error_message: Optional[str] = Field(None, description="Error message if job failed")
     records_processed: Optional[int] = Field(None, description="Number of records processed")
-
+    
     model_config = ConfigDict(
         populate_by_name=True,
         json_schema_extra={
@@ -81,7 +81,7 @@ class OHLCVData(BaseModel):
     volume: int = Field(..., description="Trading volume", ge=0)
     ticker: str = Field(..., description="Stock ticker code")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Record creation time in UTC")
-
+    
     @field_validator('open_price', 'high', 'low', 'close')
     @classmethod
     def validate_prices(cls, v):
@@ -130,7 +130,7 @@ class AnalyzedStockData(BaseModel):
     ohlcv: OHLCVData = Field(..., description="OHLCV data")
     technical_indicators: TechnicalIndicators = Field(..., description="Technical analysis indicators")
     analysis_timestamp: datetime = Field(default_factory=datetime.utcnow, description="Analysis timestamp in UTC")
-
+    
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -179,7 +179,7 @@ class ScreenerRequest(BaseModel):
 
 class ScreenerResponse(BaseModel):
     """Response model for screener API."""
-    strategy_name: str = Field(..., description="Applied strategy name")
+    strategy_name: str = Field(..., description="Applied strategy name") 
     matched_tickers: List[str] = Field(..., description="Tickers matching the strategy")
     total_matches: int = Field(..., description="Total number of matches")
     execution_time_ms: float = Field(..., description="Execution time in milliseconds")

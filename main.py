@@ -105,10 +105,16 @@ async def health_check():
 
 # Include routers
 from routers import stocks, screener, ai_analysis
+from routers import dict_screener, dict_ai_analysis
 
+# 기존 Pydantic 기반 라우터들
 app.include_router(stocks.router, prefix="/stocks", tags=["stocks"])
-app.include_router(screener.router, prefix="/screener", tags=["screener"])
-app.include_router(ai_analysis.router, prefix="/ai", tags=["ai"])
+app.include_router(screener.router, prefix="/screener-legacy", tags=["screener-legacy"])
+app.include_router(ai_analysis.router, prefix="/ai-legacy", tags=["ai-legacy"])
+
+# 새로운 딕셔너리 기반 라우터들 (메인으로 사용)
+app.include_router(dict_screener.router, tags=["screener"])
+app.include_router(dict_ai_analysis.router, tags=["ai"])
 
 
 if __name__ == "__main__":

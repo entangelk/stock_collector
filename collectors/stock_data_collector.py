@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 import pandas as pd
 import logging
 from time import sleep
-import pykrx.stock.stock as krx_stock
+import pykrx.stock as krx_stock
 
 from schemas import OHLCVData, TargetTicker
 from utils import get_kst_today, is_business_day, get_business_days_between
@@ -95,8 +95,8 @@ class StockDataCollector:
             for date_idx, row in df.iterrows():
                 ohlcv = OHLCVData(
                     date=date_idx.date(),
-                    open=float(row['시가']),
-                    high=float(row['고가']), 
+                    open_price=float(row['시가']),
+                    high=float(row['고가']),
                     low=float(row['저가']),
                     close=float(row['종가']),
                     volume=int(row['거래량']),
@@ -254,7 +254,7 @@ class StockDataCollector:
         # Check for invalid prices
         invalid_prices = []
         for d in data:
-            if d.open <= 0 or d.high <= 0 or d.low <= 0 or d.close <= 0:
+            if d.open_price <= 0 or d.high <= 0 or d.low <= 0 or d.close <= 0:
                 invalid_prices.append(d.date)
             if d.high < d.low:
                 invalid_prices.append(d.date)
