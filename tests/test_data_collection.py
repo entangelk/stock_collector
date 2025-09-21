@@ -11,7 +11,7 @@ from datetime import date, timedelta
 from typing import List
 
 # 프로젝트 경로 추가
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def test_basic_pykrx():
     """기본 pykrx 라이브러리 테스트"""

@@ -9,7 +9,7 @@ from datetime import date, timedelta
 import pandas as pd
 
 # 프로젝트 경로 추가
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def test_direct_pykrx_integration():
     """pykrx를 직접 사용한 데이터 수집 기능 테스트"""

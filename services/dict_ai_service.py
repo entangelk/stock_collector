@@ -13,6 +13,10 @@ from dotenv import load_dotenv
 
 from strategies.dict_base_strategy import DictStrategyManager
 from models.dict_models import get_mongodb_client
+from prompts.technical_analysis_prompt import create_technical_analysis_prompt
+from prompts.market_overview_prompt import create_market_overview_prompt
+from prompts.trading_opportunity_prompt import create_trading_opportunity_prompt
+from prompts.risk_assessment_prompt import create_risk_assessment_prompt
 
 # 환경변수 로딩
 load_dotenv()
@@ -256,108 +260,25 @@ class DictAIAnalysisService:
     def _create_strategy_prompt(self,
                               strategy_result: Dict[str, Any],
                               analysis_type: str) -> str:
-        """전략 분석용 프롬프트 생성"""
-        strategy_name = strategy_result.get('strategy_name', 'Unknown')
-        matches_found = strategy_result.get('matches_found', 0)
-        results = strategy_result.get('results', [])
-
-        prompt = f"""
-당신은 한국 주식 시장 전문 애널리스트입니다. 다음 {strategy_name} 전략 분석 결과를 바탕으로 전문적인 투자 분석을 제공해주세요.
-
-## 전략 분석 결과
-- 전략명: {strategy_name}
-- 조건 만족 종목 수: {matches_found}개
-- 분석 대상: {strategy_result.get('total_analyzed', 0)}개 종목
-
-## 발견된 종목들:
-"""
-
-        for i, result in enumerate(results[:5], 1):  # 상위 5개만 분석
-            prompt += f"""
-{i}. {result.get('ticker', 'N/A')}
-   - 신호 강도: {result.get('signal_strength', 0):.3f}
-   - 현재가: {result.get('current_price', 0):,}원
-   - 분석일: {result.get('date', 'N/A')}
-"""
-
-        if analysis_type == "detailed":
-            prompt += """
-## 요청 분석 내용:
-1. 각 종목의 투자 매력도 및 리스크 분석
-2. 전략별 시장 상황 해석
-3. 진입 시점 및 목표가 제시
-4. 한국 시장 특성을 고려한 투자 방향성
-5. 포트폴리오 구성 시 고려사항
-
-한국어로 구체적이고 실용적인 분석을 제공해주세요.
-"""
-        elif analysis_type == "summary":
-            prompt += """
-## 요청 분석 내용:
-간결하게 핵심 투자 포인트와 주요 종목 추천 이유를 한국어로 설명해주세요.
-"""
-        else:  # trading_signal
-            prompt += """
-## 요청 분석 내용:
-매매 신호 관점에서 각 종목의 진입/청산 타이밍을 한국어로 제시해주세요.
-"""
-
-        return prompt
+        """한국 시장 특화 전략 분석용 프롬프트 생성"""
+        # 분석 타입에 따라 적절한 프롬프트 선택
+        if analysis_type == "trading_signal":
+            return create_trading_opportunity_prompt(strategy_result, "trading_opportunity")
+        else:
+            return create_technical_analysis_prompt(strategy_result, analysis_type)
 
     def _create_portfolio_prompt(self,
                                multi_result: Dict[str, Any],
                                ticker_list: List[str],
                                analysis_focus: str) -> str:
-        """포트폴리오 분석용 프롬프트 생성"""
-        prompt = f"""
-당신은 한국 주식 시장 전문 포트폴리오 매니저입니다. 다음 종목들에 대한 다중 전략 분석 결과를 바탕으로 포트폴리오 관점의 전문 분석을 제공해주세요.
-
-## 분석 대상 종목: {', '.join(ticker_list)}
-
-## 다중 전략 분석 결과:
-- 분석된 전략 수: {multi_result.get('strategies_analyzed', 0)}개
-- 성공한 전략 수: {multi_result.get('successful_strategies', 0)}개
-- 총 발견된 매치: {multi_result.get('total_matches_found', 0)}개
-
-## 전략별 결과:
-"""
-
-        for strategy_name, result in multi_result.get('results_by_strategy', {}).items():
-            if result.get('success'):
-                prompt += f"""
-### {strategy_name}
-- 조건 만족 종목: {result.get('matches_found', 0)}개
-- 상위 종목: {', '.join([r.get('ticker', '') for r in result.get('results', [])[:3]])}
-"""
-
+        """한국 시장 특화 포트폴리오 분석용 프롬프트 생성"""
+        # 분석 초점에 따라 적절한 프롬프트 선택
         if analysis_focus == "risk_assessment":
-            prompt += """
-## 요청 분석 내용 (리스크 중심):
-1. 포트폴리오 전체 리스크 프로필 분석
-2. 종목간 상관관계 및 분산투자 효과
-3. 시장 변동성 대응 방안
-4. 손절 및 리스크 관리 전략
-"""
-        elif analysis_focus == "growth_potential":
-            prompt += """
-## 요청 분석 내용 (성장성 중심):
-1. 각 종목의 성장 잠재력 평가
-2. 업종별/테마별 성장성 분석
-3. 중장기 투자 관점의 포트폴리오 구성
-4. 성장주 vs 가치주 비중 조절 방안
-"""
-        else:  # market_timing
-            prompt += """
-## 요청 분석 내용 (타이밍 중심):
-1. 현재 시장 상황에서의 진입 타이밍
-2. 종목별 매수/매도 시점 제안
-3. 시장 사이클 관점의 포트폴리오 조정
-4. 단기/중기 투자 전략 구분
-"""
-
-        prompt += "\n한국 주식 시장의 특성을 고려하여 한국어로 구체적이고 실용적인 포트폴리오 분석을 제공해주세요."
-
-        return prompt
+            return create_risk_assessment_prompt(multi_result, ticker_list, "risk_assessment")
+        elif analysis_focus == "market_timing":
+            return create_market_overview_prompt(multi_result, ticker_list, "market_timing")
+        else:  # growth_potential 또는 기본값
+            return create_market_overview_prompt(multi_result, ticker_list, "market_overview")
 
     def _get_unavailable_response(self) -> Dict[str, Any]:
         """AI 서비스 사용 불가 시 응답"""

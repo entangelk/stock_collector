@@ -9,7 +9,7 @@ import asyncio
 from datetime import datetime
 
 # 프로젝트 경로 추가
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from services.dict_ai_service import dict_ai_service
 from strategies.dict_base_strategy import DictStrategyManager

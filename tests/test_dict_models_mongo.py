@@ -10,7 +10,7 @@ from datetime import datetime, date
 import pykrx.stock as stock
 
 # 프로젝트 경로 추가
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models import (
     create_target_ticker, create_ohlcv_data, create_technical_indicators,
